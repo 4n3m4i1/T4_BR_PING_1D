@@ -1,4 +1,5 @@
 
+#include <stdint.h>
 
 // Standard message + 2 byte checksum, no buffer
 #define PING1D_STD_MSG_LEN  10
@@ -63,4 +64,4 @@ enum PING1D_MESSAGE_ID_{
     PING1D_CTRL_CONTINUOUS_START = 1400,
     PING1D_CTRL_CONTINUOUT_STOP         // 1401
 
-}
+};

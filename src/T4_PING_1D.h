@@ -12,12 +12,13 @@
 #define PING1DSERIAL    Serial6
 #endif
 
-#define PING1D_TX_BUF_LEN    64
-#define PING1D_RX_BUF_LEN    64
+#define PING1D_TX_BUF_LEN    128
+#define PING1D_RX_BUF_LEN    128
+
 
 struct PING_1D_CONSTANTS_{
-    float32_t gain_vals[PING1D_GAIN_VALS_CT] = PING1D_GAIN_VALS_ARR;
-}
+    float gain_vals[PING1D_GAIN_VALS_CT] = PING1D_GAIN_VALS_ARR;
+};
 
 struct PING_1D_MSG_FORMAT_{
     uint8_t start1 = PING1D_START1;
@@ -28,43 +29,43 @@ struct PING_1D_MSG_FORMAT_{
     uint8_t dst_device_id;
     // Payload handled externally
     uint16_t checksum;
-}
+};
 
 
 struct PING_1D_SET_{
-
-}
+    uint8_t place;
+};
 
 
 struct PING_1D_GET_{
-
-}
+    uint8_t place;
+};
 
 
 struct PING_1D_CMDS_{
     PING_1D_GET_ get;
     PING_1D_SET_ set;
-}
+};
 
 
 struct PING_1D_DEVICE_{
         uint8_t device_id;    
         uint8_t device_type;
         uint8_t device_revision;
-        float32_t gain;
-}
+        float gain;
+};
 
 struct PING_1D_DATA_{
     uint32_t distance;
     uint16_t confidence;
     PING_1D_DEVICE_ device;
-}
+};
 
 struct PING_1D_{
     PING_1D_CMDS_ commands;
     PING_1D_DATA_ data;
     PING_1D_MSG_FORMAT_ msg;
-}
+};
 
 // Enable Hardware Serial Selected, dfl Serial6
 //  Allocate TX and RX buffer space
@@ -101,6 +102,7 @@ uint32_t p1d_read_uint32_over_serial();
 //  return ID that was read
 uint16_t p1d_return_MSG_ID();
 
+void P1D_REQUEST_DISTANCE_SIMPLE();
 void P1D_READ_DISTANCE_SIMPLE();
 
 #endif

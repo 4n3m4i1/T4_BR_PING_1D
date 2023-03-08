@@ -17,8 +17,8 @@ void init_ping_1D_serial(){
     PING1DSERIAL.begin(PING1DBAUD);
 
     // Allocate buffer space for RX and TX messaging
-    PING1DSERIAL.addMemoryForWrite(PING1D_TX_BUF_LEN, PING1D_TX_BUF_LEN);
-    PING1DSERIAL.addMemoryForRead(PING1D_RX_BUF_LEN, PING1D_RX_BUF_LEN));
+    PING1DSERIAL.addMemoryForWrite(PING_1D_TX_BUF, PING1D_TX_BUF_LEN);
+    PING1DSERIAL.addMemoryForRead(PING_1D_RX_BUF, PING1D_RX_BUF_LEN);
 }
 
 PING_1D_ *init_ping_1d_data_struct(){
@@ -39,30 +39,30 @@ void inline p1d_serialSend(uint8_t val_2_send){
 
 void p1d_send_uint16_over_serial(uint16_t val_2_send){
     while(!PING1DSERIAL.availableForWrite());
-    PING1DSERIAL.write(val_2_send >> 8);
     PING1DSERIAL.write(val_2_send & 0xFF);
+    PING1DSERIAL.write(val_2_send >> 8);
 }
 
 uint16_t p1d_read_uint16_over_serial(){
     while(!PING1DSERIAL.available());
-    uint16_t val_2_ret = (uint16_t)PING1DSERIAL.read() << 8;
-    val_2_ret |= (uint16_t)PING1DSERIAL.read();
+    uint16_t val_2_ret = (uint16_t)PING1DSERIAL.read();
+    val_2_ret |= ((uint16_t)PING1DSERIAL.read() << 8);
     return val_2_ret;
 }
 
 void p1d_send_uint32_over_serial(uint32_t val_2_send){
-    p1d_serialSend((val_2_send >> 24) & 0xFF);
-    p1d_serialSend((val_2_send >> 16) & 0xFF);
-    p1d_serialSend((val_2_send >> 8) & 0xFF);
     p1d_serialSend(val_2_send & 0xFF);
+    p1d_serialSend((val_2_send >> 8) & 0xFF);
+    p1d_serialSend((val_2_send >> 16) & 0xFF);
+    p1d_serialSend((val_2_send >> 24) & 0xFF);
 }
 
 uint32_t p1d_read_uint32_over_serial(){
     while(!PING1DSERIAL.available());
-    uint32_t val_2_ret = (uint32_t)PING1DSERIAL.read() << 24;
-    val_2_ret |= (uint32_t)PING1DSERIAL.read() << 16;
+    uint32_t val_2_ret = (uint32_t)PING1DSERIAL.read();
     val_2_ret |= (uint32_t)PING1DSERIAL.read() << 8;
-    val_2_ret |= (uint32_t)PING1DSERIAL.read() << 0;
+    val_2_ret |= (uint32_t)PING1DSERIAL.read() << 16;
+    val_2_ret |= (uint32_t)PING1DSERIAL.read() << 24;
     return val_2_ret;
 }
 
@@ -77,6 +77,24 @@ uint16_t p1d_return_MSG_ID(){
     ping1d.msg.dst_device_id = PING1DSERIAL.read();
 
     return ping1d.msg.message_id;
+}
+
+void P1D_REQUEST_DISTANCE_SIMPLE(){
+    while(PING1DSERIAL.availableForWrite() < PING1D_STD_MSG_LEN);
+    PING1DSERIAL.write('B');        // Start1
+    PING1DSERIAL.write('R');        // Start2
+    
+    // 0 bytes payload
+    p1d_send_uint16_over_serial(0x0000);
+
+    // 1211 Simple Distance ID
+    p1d_send_uint16_over_serial(PING1D_GET_DISTANCE_SIMPLE);
+
+    PING1DSERIAL.write(0x00);   // Src ID
+    PING1DSERIAL.write(0x00);   // Dst ID (any)
+
+    // Checksum, constant
+    p1d_send_uint16_over_serial(339);
 }
 
 void P1D_READ_DISTANCE_SIMPLE(){
